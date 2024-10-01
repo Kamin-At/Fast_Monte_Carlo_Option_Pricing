@@ -21,7 +21,7 @@ def down_and_out_option(int n_path, double barrier, double s,
     cdef int i, j
     cdef double tmp_s, tmp_s2, tmp_s3, tmp_s4, avg_payoff
     
-    print("n_path:", n_path)
+    print("n_path:", n_path * 2)
 
     if s <= barrier:
         return (0., 0.)
