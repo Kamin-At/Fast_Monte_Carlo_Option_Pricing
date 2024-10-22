@@ -1,13 +1,14 @@
 from libc.stdlib cimport rand, RAND_MAX
 from libc.math cimport sqrt, log, cos, sin, exp, M_PI, pow
 
-def random_uniform():
+cdef double random_uniform():
     return rand()/RAND_MAX
 
-def random_normal():
+cdef void random_normal(double *z1, double *z2):
     cdef double x = random_uniform()
     cdef double y = random_uniform()
-    return sqrt(-2.0 * log(x+0.00001)) * cos(2 * M_PI * y), sqrt(-2.0 * log(x+0.00001)) * sin(2 * M_PI * y)
+    z1[0] = sqrt(-2.0 * log(x+0.00001)) * cos(2.0 * M_PI * y)
+    z2[0] = sqrt(-2.0 * log(x+0.00001)) * sin(2.0 * M_PI * y)
 
 def down_and_out_option(int n_path, double barrier, double s, 
                          double k, double sigma, double T, double r):
@@ -19,8 +20,8 @@ def down_and_out_option(int n_path, double barrier, double s,
     cdef double dr = (r - pow(sigma, 2.)/2.) * dt
     cdef double dsigma = sigma * (pow(dt, 0.5))
     cdef int i, j
-    cdef double tmp_s, tmp_s2, tmp_s3, tmp_s4, avg_payoff
-    
+    cdef double tmp_s, tmp_s2, tmp_s3, tmp_s4, avg_payoff, tmp_z, tmp_z2
+
     print("n_path:", n_path * 2)
 
     if s <= barrier:
@@ -32,7 +33,8 @@ def down_and_out_option(int n_path, double barrier, double s,
         tmp_s3 = s
         tmp_s4 = s
         for j in range(path_lenth):
-            tmp_z, tmp_z2 = random_normal()
+            # cdef ResultPair *random_pair
+            random_normal(&tmp_z, &tmp_z2)
             tmp_s = tmp_s * exp(dr + tmp_z * dsigma)
             tmp_s2 = tmp_s2 * exp(dr - tmp_z * dsigma)#Antithetic path
             tmp_s3 = tmp_s3 * exp(dr + tmp_z2 * dsigma)#Second variable from box-muller
